@@ -1,7 +1,6 @@
 //! Loc struct of monkey compiler
 use std::cmp::{max, min};
 use std::ops::Add;
-use std::process::Output;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub struct Loc {

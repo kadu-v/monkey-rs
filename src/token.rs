@@ -1,6 +1,6 @@
 //! Token struct of monkey compiler
 
-use crate::{ast::Op, loc::*};
+use crate::loc::*;
 
 use once_cell::sync::Lazy;
 use std::collections::HashMap;

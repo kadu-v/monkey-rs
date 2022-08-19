@@ -1,7 +1,6 @@
 //! AST of monkey
-use std::collections::HashMap;
 
-use crate::{loc::Loc, token::TokenKind};
+use crate::loc::Loc;
 
 //-----------------------------------------------------------------------------
 // AST of Expressions

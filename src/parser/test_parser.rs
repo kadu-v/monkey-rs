@@ -1,12 +1,10 @@
-use crate::ast::Program;
+use super::parser::LOWEST;
 use crate::lexer::lexer::Lexer;
 use crate::parser::parser::Parser;
 use crate::{
-    ast::{BlockStmt, Expr, ExprKind, Ident, Op, Stmt, StmtKind},
+    ast::{BlockStmt, Expr, ExprKind, Ident, Op, Program, Stmt, StmtKind},
     loc::Loc,
 };
-
-use super::parser::LOWEST;
 
 //-----------------------------------------------------------------------------
 // Helper functions for unit tests of AST
