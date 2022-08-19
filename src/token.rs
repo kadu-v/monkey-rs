@@ -1,6 +1,6 @@
 //! Token struct of monkey compiler
 
-use crate::loc::*;
+use crate::{ast::Op, loc::*};
 
 use once_cell::sync::Lazy;
 use std::collections::HashMap;
@@ -28,16 +28,18 @@ pub fn lookup_keyword(ident: &str) -> Option<TokenKind> {
     None
 }
 
-// TokenKind for Hack VM
-#[derive(Debug, Clone, PartialEq, Eq)]
+// TokenKind for monkey
+
+#[derive(Debug, PartialEq, Eq, Clone, Hash)]
 pub enum TokenKind {
     EOF,
     NEWLINE,
     ILLEGAL,
 
     // 数字とシンボル
-    INT(usize),
-    STRING(String),
+    INT,
+    STRING,
+    IDENT,
 
     // 演算子
     ASSIGN,   // "="
@@ -47,9 +49,10 @@ pub enum TokenKind {
     ASTERISK, // "*"
     SLASH,    // "/"
 
-    LT,     // "<"
-    GT,     // ">"
-    EQ,     // "="
+    LT, // "<"
+    GT, // ">"
+    EQ, // "="
+    #[allow(non_camel_case_types)]
     NOT_EQ, // "!="
 
     // デリミタ
@@ -77,11 +80,12 @@ pub enum TokenKind {
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Token {
     pub kind: TokenKind,
+    pub val: Option<String>,
     pub loc: Loc,
 }
 
 impl Token {
-    pub fn new(kind: TokenKind, loc: Loc) -> Self {
-        Token { kind, loc }
+    pub fn new(kind: TokenKind, val: Option<String>, loc: Loc) -> Self {
+        Self { kind, val, loc }
     }
 }

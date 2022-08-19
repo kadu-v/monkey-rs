@@ -34,8 +34,8 @@ impl<'input> Lexer<'input> {
         match self.ch {
             None => {
                 let kind = TokenKind::EOF;
-                let loc = Loc::new(self.line, self.pos, 0);
-                Token::new(kind, loc)
+                let loc = Loc::new(self.line, self.line + 1, self.pos, self.pos + 1);
+                Token::new(kind, None, loc)
             }
             Some(c) => match c {
                 // b'/' => {
@@ -51,143 +51,149 @@ impl<'input> Lexer<'input> {
                 b'=' => {
                     if let Some(b'=') = self.peek_char() {
                         let kind = TokenKind::EQ;
-                        let loc = Loc::new(self.line, self.pos, 2);
+                        let loc = Loc::new(self.line, self.line + 1, self.pos, self.pos + 2);
                         self.read_char();
                         self.read_char();
-                        Token::new(kind, loc)
+                        Token::new(kind, None, loc)
                     } else {
                         let kind = TokenKind::ASSIGN;
-                        let loc = Loc::new(self.line, self.pos, 1);
+                        let loc = Loc::new(self.line, self.line + 1, self.pos, self.pos + 1);
                         self.read_char();
-                        Token::new(kind, loc)
+                        Token::new(kind, None, loc)
                     }
                 }
                 b'+' => {
                     let kind = TokenKind::PLUS;
-                    let loc = Loc::new(self.line, self.pos, 1);
+                    let loc = Loc::new(self.line, self.line + 1, self.pos, self.pos + 1);
                     self.read_char();
-                    Token::new(kind, loc)
+                    Token::new(kind, None, loc)
                 }
                 b'-' => {
                     let kind = TokenKind::MINUS;
-                    let loc = Loc::new(self.line, self.pos, 1);
+                    let loc = Loc::new(self.line, self.line + 1, self.pos, self.pos + 1);
                     self.read_char();
-                    Token::new(kind, loc)
+                    Token::new(kind, None, loc)
                 }
                 b'!' => {
                     if let Some(b'=') = self.peek_char() {
                         let kind = TokenKind::NOT_EQ;
-                        let loc = Loc::new(self.line, self.pos, 1);
+                        let loc = Loc::new(self.line, self.line + 1, self.pos, self.pos + 1);
                         self.read_char();
                         self.read_char();
-                        Token::new(kind, loc)
+                        Token::new(kind, None, loc)
                     } else {
                         let kind = TokenKind::BANG;
-                        let loc = Loc::new(self.line, self.pos, 1);
+                        let loc = Loc::new(self.line, self.line + 1, self.pos, self.pos + 1);
                         self.read_char();
-                        Token::new(kind, loc)
+                        Token::new(kind, None, loc)
                     }
                 }
                 b'*' => {
                     let kind = TokenKind::ASTERISK;
-                    let loc = Loc::new(self.line, self.pos, 1);
+                    let loc = Loc::new(self.line, self.line + 1, self.pos, self.pos + 1);
                     self.read_char();
-                    Token::new(kind, loc)
+                    Token::new(kind, None, loc)
                 }
                 b'/' => {
                     let kind = TokenKind::SLASH;
-                    let loc = Loc::new(self.line, self.pos, 1);
+                    let loc = Loc::new(self.line, self.line + 1, self.pos, self.pos + 1);
                     self.read_char();
-                    Token::new(kind, loc)
+                    Token::new(kind, None, loc)
                 }
                 b'<' => {
                     let kind = TokenKind::LT;
-                    let loc = Loc::new(self.line, self.pos, 1);
+                    let loc = Loc::new(self.line, self.line + 1, self.pos, self.pos + 1);
                     self.read_char();
-                    Token::new(kind, loc)
+                    Token::new(kind, None, loc)
                 }
 
                 b'>' => {
                     let kind = TokenKind::GT;
-                    let loc = Loc::new(self.line, self.pos, 1);
+                    let loc = Loc::new(self.line, self.line + 1, self.pos, self.pos + 1);
                     self.read_char();
-                    Token::new(kind, loc)
+                    Token::new(kind, None, loc)
                 }
                 b',' => {
                     let kind = TokenKind::COMMA;
-                    let loc = Loc::new(self.line, self.pos, 1);
+                    let loc = Loc::new(self.line, self.line + 1, self.pos, self.pos + 1);
                     self.read_char();
-                    Token::new(kind, loc)
+                    Token::new(kind, None, loc)
                 }
                 b';' => {
                     let kind = TokenKind::SEMICOLON;
-                    let loc = Loc::new(self.line, self.pos, 1);
+                    let loc = Loc::new(self.line, self.line + 1, self.pos, self.pos + 1);
                     self.read_char();
-                    Token::new(kind, loc)
+                    Token::new(kind, None, loc)
                 }
                 b':' => {
                     let kind = TokenKind::COLON;
-                    let loc = Loc::new(self.line, self.pos, 1);
+                    let loc = Loc::new(self.line, self.line + 1, self.pos, self.pos + 1);
                     self.read_char();
-                    Token::new(kind, loc)
+                    Token::new(kind, None, loc)
                 }
                 b'(' => {
                     let kind = TokenKind::LPAREN;
-                    let loc = Loc::new(self.line, self.pos, 1);
+                    let loc = Loc::new(self.line, self.line + 1, self.pos, self.pos + 1);
                     self.read_char();
-                    Token::new(kind, loc)
+                    Token::new(kind, None, loc)
                 }
                 b')' => {
                     let kind = TokenKind::RPAREN;
-                    let loc = Loc::new(self.line, self.pos, 1);
+                    let loc = Loc::new(self.line, self.line + 1, self.pos, self.pos + 1);
                     self.read_char();
-                    Token::new(kind, loc)
+                    Token::new(kind, None, loc)
                 }
                 b'{' => {
                     let kind = TokenKind::LBRACE;
-                    let loc = Loc::new(self.line, self.pos, 1);
+                    let loc = Loc::new(self.line, self.line + 1, self.pos, self.pos + 1);
                     self.read_char();
-                    Token::new(kind, loc)
+                    Token::new(kind, None, loc)
                 }
                 b'}' => {
                     let kind = TokenKind::RBRACE;
-                    let loc = Loc::new(self.line, self.pos, 1);
+                    let loc = Loc::new(self.line, self.line + 1, self.pos, self.pos + 1);
                     self.read_char();
-                    Token::new(kind, loc)
+                    Token::new(kind, None, loc)
                 }
                 b'[' => {
                     let kind = TokenKind::LBRACKET;
-                    let loc = Loc::new(self.line, self.pos, 1);
+                    let loc = Loc::new(self.line, self.line + 1, self.pos, self.pos + 1);
                     self.read_char();
-                    Token::new(kind, loc)
+                    Token::new(kind, None, loc)
                 }
                 b']' => {
                     let kind = TokenKind::RBRACKET;
-                    let loc = Loc::new(self.line, self.pos, 1);
+                    let loc = Loc::new(self.line, self.line + 1, self.pos, self.pos + 1);
                     self.read_char();
-                    Token::new(kind, loc)
+                    Token::new(kind, None, loc)
                 }
                 _ => {
                     if self.is_digit() {
                         let s = String::from_utf8(self.read_number().to_vec()).unwrap();
-                        let n = s.parse::<usize>().unwrap();
-                        let kind = TokenKind::INT(n);
-                        let loc = Loc::new(self.line, self.pos - s.len(), s.len());
-                        Token::new(kind, loc)
+                        let kind = TokenKind::INT;
+                        let loc = Loc::new(self.line, self.line + 1, self.pos - s.len(), self.pos);
+                        Token::new(kind, Some(s), loc)
                     } else if self.is_letter() {
                         let ident = String::from_utf8(self.read_identifier().to_vec()).unwrap();
                         let width = ident.len();
                         match lookup_keyword(&ident) {
-                            Some(kind) => {
-                                Token::new(kind, Loc::new(self.line, self.pos - width, width))
-                            }
+                            Some(kind) => Token::new(
+                                kind,
+                                Some(ident),
+                                Loc::new(self.line, self.line + 1, self.pos - width, self.pos),
+                            ),
                             None => Token::new(
-                                TokenKind::STRING(ident),
-                                Loc::new(self.line, self.pos - width, width),
+                                TokenKind::IDENT,
+                                Some(ident),
+                                Loc::new(self.line, self.line + 1, self.pos - width, self.pos),
                             ),
                         }
                     } else {
-                        Token::new(TokenKind::ILLEGAL, Loc::new(self.line, self.pos, 1))
+                        Token::new(
+                            TokenKind::ILLEGAL,
+                            None,
+                            Loc::new(self.line, self.line + 1, self.pos, self.pos + 1),
+                        )
                     }
                 }
             },
