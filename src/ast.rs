@@ -21,19 +21,20 @@ impl Expr {
 #[derive(Debug, PartialEq, Eq, Clone, Hash)]
 pub enum ExprKind {
     // Literal
-    LitInt(usize),                  // "1"
-    LitString(String),              // "hoge"
-    LitBool(bool),                  // "true"
-    LitFunc(Vec<Ident>, BlockStmt), // "fn(x, y) { blockstmt }"
-    LitArray(Vec<Expr>),            // "[1, 2, 3]"
+    LitInt(usize),                 // "1"
+    LitString(String),             // "hoge"
+    LitBool(bool),                 // "true"
+    LitFunc(Vec<Expr>, BlockStmt), // "fn(x, y)  blockstmt "
+    LitArray(Vec<Expr>),           // "[1, 2, 3]"
     // LitHash(HashMap<Expr, Expr>),   // hash.get(x)
 
     // Expression
-    Infix(Op, Box<Expr>, Box<Expr>),     // "1 + 2"
-    Prefix(Op, Box<Expr>),               // "-1"
-    If(Box<Expr>, BlockStmt, BlockStmt), // "if true 1 else 2"
-    Call(Box<Expr>, Vec<Expr>),          // "f(1, 2)"
-    Index(Box<Expr>, Box<Expr>),         // "a[i]"
+    Infix(Op, Box<Expr>, Box<Expr>), // "1 + 2"
+    Prefix(Op, Box<Expr>),           // "-1"
+    Ident(String),                   // "x"
+    // If(Box<Expr>, BlockStmt, BlockStmt), // "if true 1 else 2"
+    Call(Box<Expr>, Vec<Expr>),  // "f(1, 2)"
+    Index(Box<Expr>, Box<Expr>), // "a[i]"
 }
 
 #[derive(Debug, PartialEq, Eq, Clone, Copy, Hash)]
@@ -59,6 +60,12 @@ pub struct BlockStmt {
     pub loc: Loc,
 }
 
+impl BlockStmt {
+    pub fn new(block: Vec<Stmt>, loc: Loc) -> Self {
+        Self { block, loc }
+    }
+}
+
 #[derive(Debug, PartialEq, Eq, Clone, Hash)]
 pub struct Stmt {
     pub kind: StmtKind,
@@ -73,21 +80,10 @@ impl Stmt {
 
 #[derive(Debug, PartialEq, Eq, Clone, Hash)]
 pub enum StmtKind {
-    Let(Ident, Box<Expr>), // "let x = 1"
-    Return(Box<Expr>),     // "return x"
-    ExprStmt(Box<Expr>),   // "e;"
-}
-
-#[derive(Debug, PartialEq, Eq, Clone, Hash)]
-pub struct Ident {
-    pub name: String, // "x"
-    pub loc: Loc,
-}
-
-impl Ident {
-    pub fn new(name: String, loc: Loc) -> Self {
-        Self { name, loc }
-    }
+    Let(Box<Expr>, Box<Expr>),                   // "let x = 1"
+    Return(Box<Expr>),                           // "return x"
+    ExprStmt(Box<Expr>),                         // "e;"
+    If(Box<Expr>, BlockStmt, Option<BlockStmt>), // "if true 1 else 2"
 }
 
 //-----------------------------------------------------------------------------

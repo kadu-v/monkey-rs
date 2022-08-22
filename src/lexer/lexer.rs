@@ -179,7 +179,7 @@ impl<'input> Lexer<'input> {
                         match lookup_keyword(&ident) {
                             Some(kind) => Token::new(
                                 kind,
-                                Some(ident),
+                                None,
                                 Loc::new(self.line, self.line + 1, self.pos - width, self.pos),
                             ),
                             None => Token::new(

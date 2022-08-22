@@ -30,7 +30,7 @@ pub fn lookup_keyword(ident: &str) -> Option<TokenKind> {
 
 // TokenKind for monkey
 
-#[derive(Debug, PartialEq, Eq, Clone, Hash)]
+#[derive(Debug, PartialEq, Eq, Copy, Clone, Hash)]
 pub enum TokenKind {
     EOF,
     NEWLINE,
