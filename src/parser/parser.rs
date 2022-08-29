@@ -144,6 +144,7 @@ impl<'input> Parser<'input> {
         }
     }
 
+    // TODO: parse only an identifier instead of an idetifier expression
     pub fn parse_let_statement(&mut self) -> Result<Stmt> {
         let loc0 = self.cur_token.loc;
 
@@ -151,13 +152,11 @@ impl<'input> Parser<'input> {
 
         let ident = self.parse_identifier_expression()?;
 
-        // check that next token is assign
         self.expect_cur_token_and_consume(TokenKind::ASSIGN)?;
 
         // parse an expression
         let expr = self.parse_expression(LOWEST)?;
 
-        // check that an end of let-expression is semicolon
         self.expect_cur_token_and_consume(TokenKind::SEMICOLON)?;
 
         // calculate a location of let-statement
@@ -173,10 +172,9 @@ impl<'input> Parser<'input> {
 
         let expr = self.parse_expression(LOWEST)?;
 
-        // check that an end of let-expression is semicolon
         self.expect_cur_token_and_consume(TokenKind::SEMICOLON)?;
 
-        // calculate a location of let-statement
+        // calculate a location of return-statement
         let loc = loc0 + self.cur_token.loc;
 
         Ok(Stmt::new(StmtKind::Return(expr.into()), loc))
@@ -187,10 +185,9 @@ impl<'input> Parser<'input> {
 
         let expr = self.parse_expression(LOWEST)?;
 
-        // check that an end of let-expression is semicolon
         self.expect_cur_token_and_consume(TokenKind::SEMICOLON)?;
 
-        // calculate a location of let-statement
+        // calculate a location of expression-statement
         let loc = loc0 + self.cur_token.loc;
 
         Ok(Stmt::new(StmtKind::ExprStmt(expr.into()), loc))
@@ -199,16 +196,16 @@ impl<'input> Parser<'input> {
     pub fn parse_if_statement(&mut self) -> Result<Stmt> {
         let loc0 = self.cur_token.loc;
 
-        self.expect_cur_token_and_consume(TokenKind::IF)?; // "if"
+        self.expect_cur_token_and_consume(TokenKind::IF)?;
 
-        let cond = self.parse_expression(LOWEST)?; // condition
+        let cond = self.parse_expression(LOWEST)?;
 
-        let then_block = self.parse_block_statement()?; // block
+        let then_block = self.parse_block_statement()?;
 
         let else_block = if self.cur_token_kind_is(TokenKind::ELSE) {
             self.next_token();
 
-            let else_block = self.parse_block_statement()?; // expr
+            let else_block = self.parse_block_statement()?;
 
             Some(else_block)
         } else {
@@ -291,6 +288,7 @@ impl<'input> Parser<'input> {
                 | TokenKind::LT
                 | TokenKind::EQ
                 | TokenKind::NOT_EQ => self.parse_infix_epxression(expr)?,
+                TokenKind::LPAREN => self.parse_call_expression(expr)?,
                 _ => unimplemented!(
                     "parse_expression has not implemented yet, cur_token: {:?}",
                     self.cur_token
@@ -383,6 +381,41 @@ impl<'input> Parser<'input> {
         Ok(expr)
     }
 
+    pub fn parse_call_expression(&mut self, callee: Expr) -> Result<Expr> {
+        let loc = callee.loc;
+
+        let args = self.parse_call_arguments()?;
+
+        let loc = loc + self.cur_token.loc;
+
+        Ok(Expr::new(ExprKind::Call(callee.into(), args), loc))
+    }
+
+    fn parse_call_arguments(&mut self) -> Result<Vec<Expr>> {
+        let loc = self.cur_token.loc;
+
+        self.expect_cur_token_and_consume(TokenKind::LPAREN)?;
+
+        let mut args = vec![];
+
+        if !self.cur_token_kind_is(TokenKind::RPAREN) {
+            let arg = self.parse_expression(LOWEST)?;
+            args.push(arg);
+        }
+
+        while self.cur_token_kind_is(TokenKind::COMMA) {
+            self.next_token();
+            let arg = self.parse_expression(LOWEST)?;
+            args.push(arg);
+        }
+
+        self.expect_cur_token_and_consume(TokenKind::RPAREN)?;
+
+        let loc = loc + self.cur_token.loc;
+
+        Ok(args)
+    }
+
     //-----------------------------------------------------------------------------
     // Parser for a literal
     //-----------------------------------------------------------------------------
@@ -427,18 +460,44 @@ impl<'input> Parser<'input> {
         let loc = self.cur_token.loc;
         unimplemented!("parse_lit_string")
     }
+
     // Assume that a kind of first token is FUNCTION
     pub fn parse_lit_function(&mut self) -> Result<Expr> {
-        let loc = self.cur_token.loc;
+        let loc0 = self.cur_token.loc;
 
         self.expect_cur_token_and_consume(TokenKind::FUNCITON)?;
 
-        self.expect_cur_token_and_consume(TokenKind::LPAREN)?;
-        let params = self.parse_parameters()?;
-        self.expect_cur_token_and_consume(TokenKind::RPAREN)?;
+        let params = self.parse_function_parameters()?;
+
+        let body = self.parse_block_statement()?;
+
+        let loc = loc0 + self.cur_token.loc;
+
+        Ok(Expr::new(ExprKind::LitFunc(params, body), loc))
     }
 
-    pub fn parse_parameters(&mut self) -> Result<Vec<Expr>> {
-        unimplemented!()
+    // TODO: parse only an identifier instead of an identifier expression
+    pub fn parse_function_parameters(&mut self) -> Result<Vec<Expr>> {
+        let mut params = vec![];
+
+        self.expect_cur_token_and_consume(TokenKind::LPAREN)?;
+
+        // parse the first token
+        if self.cur_token_kind_is(TokenKind::IDENT) {
+            let ident = self.parse_identifier_expression()?;
+            params.push(ident);
+        }
+
+        while self.cur_token_kind_is(TokenKind::COMMA) {
+            self.next_token(); // consume a comma token
+
+            let ident = self.parse_identifier_expression()?;
+
+            params.push(ident);
+        }
+
+        self.expect_cur_token_and_consume(TokenKind::RPAREN)?;
+
+        Ok(params)
     }
 }

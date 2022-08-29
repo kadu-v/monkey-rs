@@ -54,11 +54,11 @@ fn assert_expr(expect: Expr, actual: Expr) {
             }
             assert_block_stmt(block0, block1);
         }
-        (ExprKind::LitArray(arry0), ExprKind::LitArray(arry1)) => {
-            for (i0, i1) in arry0.into_iter().zip(arry1) {
-                assert_expr(i0, i1);
-            }
-        }
+        // (ExprKind::LitArray(arry0), ExprKind::LitArray(arry1)) => {
+        //     for (i0, i1) in arry0.into_iter().zip(arry1) {
+        //         assert_expr(i0, i1);
+        //     }
+        // }
         (ExprKind::Infix(op0, expr0, expr1), ExprKind::Infix(op1, expr2, expr3)) => {
             assert_eq!(op0, op1);
             assert_expr(*expr0, *expr2);
@@ -74,6 +74,13 @@ fn assert_expr(expect: Expr, actual: Expr) {
         //     assert_block_stmt(block0, block1);
         //     assert_block_stmt(block2, block3);
         // }
+        (ExprKind::Call(f0, args0), ExprKind::Call(f1, args1)) => {
+            assert_expr(*f0, *f1);
+
+            for (arg0, arg1) in args0.into_iter().zip(args1) {
+                assert_expr(arg0, arg1);
+            }
+        }
         _ => assert_eq!(expect.kind, actual.kind),
     }
 }
@@ -112,11 +119,11 @@ fn new_expr_lit_func(func: Vec<Expr>, block: BlockStmt) -> Expr {
     Expr::new(kind, loc)
 }
 
-fn new_expr_lit_array(arry: Vec<Expr>) -> Expr {
-    let kind = ExprKind::LitArray(arry);
-    let loc = new_dummy_loc();
-    Expr::new(kind, loc)
-}
+// fn new_expr_lit_array(arry: Vec<Expr>) -> Expr {
+//     let kind = ExprKind::LitArray(arry);
+//     let loc = new_dummy_loc();
+//     Expr::new(kind, loc)
+// }
 
 fn new_expr_infix(op: Op, expr0: Expr, expr1: Expr) -> Expr {
     let kind = ExprKind::Infix(op, expr0.into(), expr1.into());
@@ -148,11 +155,11 @@ fn new_expr_call(expr0: Expr, exprs: Vec<Expr>) -> Expr {
     Expr::new(kind, loc)
 }
 
-fn new_expr_index(expr0: Expr, expr1: Expr) -> Expr {
-    let kind = ExprKind::Index(expr0.into(), expr1.into());
-    let loc = new_dummy_loc();
-    Expr::new(kind, loc)
-}
+// fn new_expr_index(expr0: Expr, expr1: Expr) -> Expr {
+//     let kind = ExprKind::Index(expr0.into(), expr1.into());
+//     let loc = new_dummy_loc();
+//     Expr::new(kind, loc)
+// }
 
 fn new_stmt_let(ident: Expr, expr: Expr) -> Stmt {
     let kind = StmtKind::Let(ident.into(), expr.into());
@@ -203,14 +210,19 @@ macro_rules! bool {
     };
 }
 
-macro_rules! func {
-    // function
-    ($($x:expr),*, $y:expr) => {
+macro_rules! params {
+    ($($x:expr),*) => {{
         let mut params = vec![];
         $(
             params.push($x);
         )*
-        new_lit_func(params, $y)
+        params
+    }};
+}
+macro_rules! func {
+    // function
+    ($x:expr, $y:expr) => {
+        new_expr_lit_func($x, $y)
     };
 }
 
@@ -268,6 +280,18 @@ macro_rules! expr {
     (if, $cond:expr, $x:expr, $y:expr) => {
         new_expr_if($cond, $x, $y)
     };
+
+    // call expression
+    ($x:literal, $($y:expr),*) => {
+        {
+            let f = new_expr_ident($x);
+            let mut params = vec![];
+            $(
+                params.push($y);
+            )*
+            new_expr_call(f, params)
+        }
+    };
 }
 
 macro_rules! stmt {
@@ -297,34 +321,39 @@ macro_rules! blockstmt {
         new_block_stmt(block)}
     };
 }
-//-----------------------------------------------------------------------------
-// Unit tests of Prefix Expressions
-//-----------------------------------------------------------------------------
 
+//-----------------------------------------------------------------------------
+// Unit tests of Literals
+//-----------------------------------------------------------------------------
 #[test]
-fn test_parse_prefix_expression_minus_one() {
-    let input = "-1";
+fn test_parse_lit_function_simple() {
+    let input = "fn(x) { return x; }";
     let mut l = Lexer::new(input);
     let mut p = Parser::new(&mut l);
     let actual = p
-        .parse_prefix_expression()
+        .parse_lit_function()
         .expect("can not parse a prefix expression");
 
-    let expect = expr!(-, int!(1));
+    let expect = func!(
+        params!(expr!("x")),
+        blockstmt!(stmt!(return, expr!("x"), ;))
+    );
     assert_expr(expect, actual)
 }
 
 #[test]
-fn test_parse_prefix_expression_not_true() {
-    let input = "!true";
+fn test_parse_lit_function_complex() {
+    let input = "fn(x, y) { return x + y; }";
     let mut l = Lexer::new(input);
     let mut p = Parser::new(&mut l);
     let actual = p
-        .parse_prefix_expression()
-        .expect("can not parse a prefix_expression");
+        .parse_lit_function()
+        .expect("can not parse a prefix expression");
 
-    let expect = expr!(!, bool!(true));
-
+    let expect = func!(
+        params!(expr!("x"), expr!("y")),
+        blockstmt!(stmt!(return, expr!(expr!("x"), +, expr!("y")), ;))
+    );
     assert_expr(expect, actual)
 }
 
@@ -426,6 +455,71 @@ fn test_parse_infix_expression_paren() {
         .expect("can not parse a prefix_expression");
 
     let expect = expr!(int!(1), +, int!(2));
+
+    assert_expr(expect, actual)
+}
+
+//-----------------------------------------------------------------------------
+// Unit tests of Prefix Expressions
+//-----------------------------------------------------------------------------
+
+#[test]
+fn test_parse_prefix_expression_minus_one() {
+    let input = "-1";
+    let mut l = Lexer::new(input);
+    let mut p = Parser::new(&mut l);
+    let actual = p
+        .parse_prefix_expression()
+        .expect("can not parse a prefix expression");
+
+    let expect = expr!(-, int!(1));
+    assert_expr(expect, actual)
+}
+
+#[test]
+fn test_parse_prefix_expression_not_true() {
+    let input = "!true";
+    let mut l = Lexer::new(input);
+    let mut p = Parser::new(&mut l);
+    let actual = p
+        .parse_prefix_expression()
+        .expect("can not parse a prefix_expression");
+
+    let expect = expr!(!, bool!(true));
+
+    assert_expr(expect, actual)
+}
+
+//-----------------------------------------------------------------------------
+// Unit tests of Identifier Expression
+//-----------------------------------------------------------------------------
+#[test]
+fn test_parse_identifier_expression() {
+    let input = "x";
+    let mut l = Lexer::new(input);
+    let mut p = Parser::new(&mut l);
+    let actual = p
+        .parse_identifier_expression()
+        .expect("can not parse a identifier_expression");
+
+    let expect = expr!("x");
+
+    assert_expr(expect, actual)
+}
+
+//-----------------------------------------------------------------------------
+// Unit tests of Call Expression
+//-----------------------------------------------------------------------------
+#[test]
+fn test_parse_call_expression() {
+    let input = "f(1, 2)";
+    let mut l = Lexer::new(input);
+    let mut p = Parser::new(&mut l);
+    let actual = p
+        .parse_expression(LOWEST)
+        .expect("can not parse a call_expression");
+
+    let expect = expr!("f", int!(1), int!(2));
 
     assert_expr(expect, actual)
 }

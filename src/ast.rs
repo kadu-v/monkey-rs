@@ -25,7 +25,7 @@ pub enum ExprKind {
     LitString(String),             // "hoge"
     LitBool(bool),                 // "true"
     LitFunc(Vec<Expr>, BlockStmt), // "fn(x, y)  blockstmt "
-    LitArray(Vec<Expr>),           // "[1, 2, 3]"
+    // LitArray(Vec<Expr>),           // "[1, 2, 3]"
     // LitHash(HashMap<Expr, Expr>),   // hash.get(x)
 
     // Expression
@@ -33,8 +33,8 @@ pub enum ExprKind {
     Prefix(Op, Box<Expr>),           // "-1"
     Ident(String),                   // "x"
     // If(Box<Expr>, BlockStmt, BlockStmt), // "if true 1 else 2"
-    Call(Box<Expr>, Vec<Expr>),  // "f(1, 2)"
-    Index(Box<Expr>, Box<Expr>), // "a[i]"
+    Call(Box<Expr>, Vec<Expr>), // "f(1, 2)"
+                                // Index(Box<Expr>, Box<Expr>), // "a[i]"
 }
 
 #[derive(Debug, PartialEq, Eq, Clone, Copy, Hash)]
@@ -55,18 +55,6 @@ pub enum Op {
 //-----------------------------------------------------------------------------
 
 #[derive(Debug, PartialEq, Eq, Clone, Hash)]
-pub struct BlockStmt {
-    pub block: Vec<Stmt>, // "stmt1 stmt2"
-    pub loc: Loc,
-}
-
-impl BlockStmt {
-    pub fn new(block: Vec<Stmt>, loc: Loc) -> Self {
-        Self { block, loc }
-    }
-}
-
-#[derive(Debug, PartialEq, Eq, Clone, Hash)]
 pub struct Stmt {
     pub kind: StmtKind,
     pub loc: Loc,
@@ -84,6 +72,22 @@ pub enum StmtKind {
     Return(Box<Expr>),                           // "return x"
     ExprStmt(Box<Expr>),                         // "e;"
     If(Box<Expr>, BlockStmt, Option<BlockStmt>), // "if true 1 else 2"
+}
+
+//-----------------------------------------------------------------------------
+// AST of Block Statements
+//-----------------------------------------------------------------------------
+
+#[derive(Debug, PartialEq, Eq, Clone, Hash)]
+pub struct BlockStmt {
+    pub block: Vec<Stmt>, // "stmt1 stmt2"
+    pub loc: Loc,
+}
+
+impl BlockStmt {
+    pub fn new(block: Vec<Stmt>, loc: Loc) -> Self {
+        Self { block, loc }
+    }
 }
 
 //-----------------------------------------------------------------------------
