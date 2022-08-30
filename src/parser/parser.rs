@@ -4,11 +4,12 @@ use crate::{
     ast::{
         BlockStmt, Expr,
         ExprKind::{self, *},
-        Op, Program, Stmt,
+        Node, Op, Program, Stmt,
         StmtKind::{self, *},
     },
     error::{ParseError, Result},
     lexer::lexer::Lexer,
+    loc::Loc,
     token::{Token, TokenKind},
 };
 use once_cell::sync::Lazy;
@@ -120,15 +121,17 @@ impl<'input> Parser<'input> {
     // Parser for a program
     //-----------------------------------------------------------------------------
 
-    fn parse_program(&mut self) -> Result<Program> {
+    pub fn parse_program(&mut self) -> Result<Program> {
         let mut stmts = Vec::new();
+        let mut loc = Loc::new(0, 0, 0, 0);
         while self.cur_token_kind_is(TokenKind::EOF) {
             let stmt = self.parse_statement()?;
+            loc = loc + stmt.loc;
             stmts.push(stmt);
             self.next_token();
         }
 
-        Ok(Program::new(stmts))
+        Ok(Program::new(stmts, loc))
     }
 
     //-----------------------------------------------------------------------------
@@ -442,7 +445,7 @@ impl<'input> Parser<'input> {
         let loc = self.cur_token.loc;
         if let Some(s) = self.cur_token.val.clone() {
             self.next_token();
-            match s.parse::<usize>() {
+            match s.parse::<isize>() {
                 Ok(n) => Ok(Expr::new(LitInt(n), loc)),
                 Err(_) => ParseError::report_error_message(
                     self.cur_token.loc,

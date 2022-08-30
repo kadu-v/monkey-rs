@@ -95,7 +95,7 @@ fn new_dummy_loc() -> Loc {
     Loc::new(0, 0, 0, 0)
 }
 
-fn new_expr_lit_integer(n: usize) -> Expr {
+fn new_expr_lit_integer(n: isize) -> Expr {
     let kind = ExprKind::LitInt(n);
     let loc = new_dummy_loc();
     Expr::new(kind, loc)
@@ -191,7 +191,9 @@ fn new_block_stmt(block: Vec<Stmt>) -> BlockStmt {
 }
 
 fn new_program(stmts: Vec<Stmt>) -> Program {
-    Program::new(stmts)
+    let loc = new_dummy_loc();
+
+    Program::new(stmts, loc)
 }
 
 //-----------------------------------------------------------------------------

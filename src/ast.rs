@@ -5,6 +5,12 @@ use crate::loc::Loc;
 //-----------------------------------------------------------------------------
 // AST of Expressions
 //-----------------------------------------------------------------------------
+pub trait Node {
+    fn get_loc(&self) -> Loc;
+}
+//-----------------------------------------------------------------------------
+// AST of Expressions
+//-----------------------------------------------------------------------------
 
 #[derive(Debug, PartialEq, Eq, Clone, Hash)]
 pub struct Expr {
@@ -18,10 +24,16 @@ impl Expr {
     }
 }
 
+impl Node for Expr {
+    fn get_loc(&self) -> Loc {
+        self.loc
+    }
+}
+
 #[derive(Debug, PartialEq, Eq, Clone, Hash)]
 pub enum ExprKind {
     // Literal
-    LitInt(usize),                 // "1"
+    LitInt(isize),                 // "1"
     LitString(String),             // "hoge"
     LitBool(bool),                 // "true"
     LitFunc(Vec<Expr>, BlockStmt), // "fn(x, y)  blockstmt "
@@ -66,6 +78,12 @@ impl Stmt {
     }
 }
 
+impl Node for Stmt {
+    fn get_loc(&self) -> Loc {
+        self.loc
+    }
+}
+
 #[derive(Debug, PartialEq, Eq, Clone, Hash)]
 pub enum StmtKind {
     Let(Box<Expr>, Box<Expr>),                   // "let x = 1"
@@ -90,6 +108,12 @@ impl BlockStmt {
     }
 }
 
+impl Node for BlockStmt {
+    fn get_loc(&self) -> Loc {
+        self.loc
+    }
+}
+
 //-----------------------------------------------------------------------------
 // AST of Program
 //-----------------------------------------------------------------------------
@@ -97,10 +121,17 @@ impl BlockStmt {
 #[derive(Debug, PartialEq, Eq, Clone, Hash)]
 pub struct Program {
     pub stmts: Vec<Stmt>,
+    pub loc: Loc,
 }
 
 impl Program {
-    pub fn new(stmts: Vec<Stmt>) -> Self {
-        Self { stmts }
+    pub fn new(stmts: Vec<Stmt>, loc: Loc) -> Self {
+        Self { stmts, loc }
+    }
+}
+
+impl Node for Program {
+    fn get_loc(&self) -> Loc {
+        self.loc
     }
 }
