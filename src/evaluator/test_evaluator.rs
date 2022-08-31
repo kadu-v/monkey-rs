@@ -42,3 +42,42 @@ fn test_eval_true() {
     let expect = new_object(ObjectKind::Boolean(true));
     assert_eq!(actual, expect)
 }
+
+#[test]
+fn test_eval_integer() {
+    let actual = parse_and_eval("1");
+    let expect = new_object(ObjectKind::Integer(1));
+    assert_eq!(actual, expect)
+}
+
+//-----------------------------------------------------------------------------
+// Unit tests of Expression
+//-----------------------------------------------------------------------------
+
+#[test]
+fn test_eval_infix_add1() {
+    let actual = parse_and_eval("1 + 1");
+    let expect = new_object(ObjectKind::Integer(2));
+    assert_eq!(actual, expect)
+}
+
+#[test]
+fn test_eval_infix_add2() {
+    let actual = parse_and_eval("1 + 1 + 2");
+    let expect = new_object(ObjectKind::Integer(4));
+    assert_eq!(actual, expect)
+}
+
+#[test]
+fn test_eval_infix_sub1() {
+    let actual = parse_and_eval("1 - 1");
+    let expect = new_object(ObjectKind::Integer(2));
+    assert_eq!(actual, expect)
+}
+
+#[test]
+fn test_eval_infix_sub2() {
+    let actual = parse_and_eval("1 + 1 - 2");
+    let expect = new_object(ObjectKind::Integer(4));
+    assert_eq!(actual, expect)
+}

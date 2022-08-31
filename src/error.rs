@@ -71,44 +71,29 @@ impl From<ParseError> for Box<dyn Error> {
 // Error struct for Evaluation
 //-----------------------------------------------------------------------------\
 #[derive(Debug, PartialEq, Eq, Clone, Hash)]
-pub struct EvalError<T>
-where
-    T: Node + Debug + 'static,
-{
+pub struct EvalError {
     pub loc: Loc,
-    pub prg: T,
     pub error_msg: String,
 }
 
-impl<T> EvalError<T>
-where
-    T: Node + Debug + 'static,
-{
-    pub fn new(loc: Loc, prg: T, error_msg: String) -> Self {
+impl EvalError {
+    pub fn new(loc: Loc, error_msg: impl Into<String>) -> Self {
         Self {
             loc,
-            prg,
-            error_msg,
+            error_msg: error_msg.into(),
         }
     }
 
-    pub fn report_error_message(loc: Loc, prg: T, error_msg: impl Into<String>) -> Result<T> {
-        let error_msg = format!(
-            "woops!! cannot evaluate this object: {:?}, {}",
-            prg,
-            error_msg.into()
-        );
-        Err(EvalError::new(loc, prg, error_msg).into())
+    pub fn report_error_message<T>(loc: Loc, error_msg: impl Into<String>) -> Result<T> {
+        let error_msg = format!("woops!! cannot evaluate this object: {}", error_msg.into());
+        Err(EvalError::new(loc, error_msg).into())
     }
 }
 
-impl<T> Error for EvalError<T> where T: Node + Debug {}
+impl Error for EvalError {}
 
-impl<T> From<EvalError<T>> for Box<dyn Error>
-where
-    T: Node + Debug + 'static,
-{
-    fn from(item: EvalError<T>) -> Self {
+impl From<EvalError> for Box<dyn Error> {
+    fn from(item: EvalError) -> Self {
         Box::new(item)
     }
 }

@@ -4,8 +4,8 @@ use crate::object::environment::Env;
 
 #[derive(Debug, Clone)]
 pub struct Object {
-    kind: ObjectKind,
-    loc: Loc,
+    pub kind: ObjectKind,
+    pub loc: Loc,
 }
 
 impl Object {
