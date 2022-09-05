@@ -28,7 +28,7 @@ impl Env {
         }
     }
 
-    pub fn set(&mut self, key: String, obj: Object) -> Option<Object> {
-        self.store.insert(key, obj)
+    pub fn set(&mut self, key: impl Into<String>, obj: Object) -> Option<Object> {
+        self.store.insert(key.into(), obj)
     }
 }

@@ -1,4 +1,5 @@
 use crate::lexer::lexer::Lexer;
+use crate::object::environment::Env;
 use crate::object::object::{Object, ObjectKind};
 use crate::parser::parser::Parser;
 use crate::{
@@ -23,9 +24,12 @@ fn parse_and_eval(input: &str) -> Object {
     let mut prg = p
         .parse_expression(1)
         .expect("can not parse a prefix expression");
-    prg.eval().expect("cannot evaluate a false")
-}
+    let mut env = Env::new();
+    env.set("i", Object::new(ObjectKind::Integer(1), new_dummy_loc()));
+    env.set("b", Object::new(ObjectKind::Boolean(true), new_dummy_loc()));
 
+    prg.eval(&mut env).expect("cannot evaluate a false")
+}
 //-----------------------------------------------------------------------------
 // Unit tests of Literals
 //-----------------------------------------------------------------------------
@@ -79,5 +83,131 @@ fn test_eval_infix_sub1() {
 fn test_eval_infix_sub2() {
     let actual = parse_and_eval("1 + 1 - 2");
     let expect = new_object(ObjectKind::Integer(4));
+    assert_eq!(actual, expect)
+}
+
+#[test]
+fn test_eval_infix_mul1() {
+    let actual = parse_and_eval("1 * 2");
+    let expect = new_object(ObjectKind::Integer(2));
+    assert_eq!(actual, expect)
+}
+
+#[test]
+fn test_eval_infix_mul2() {
+    let actual = parse_and_eval("1 + 1 * 2");
+    let expect = new_object(ObjectKind::Integer(3));
+    assert_eq!(actual, expect)
+}
+
+#[test]
+fn test_eval_infix_div1() {
+    let actual = parse_and_eval("1 / 2");
+    let expect = new_object(ObjectKind::Integer(0));
+    assert_eq!(actual, expect)
+}
+
+#[test]
+fn test_eval_infix_div2() {
+    let actual = parse_and_eval("1 + 1 / 2");
+    let expect = new_object(ObjectKind::Integer(1));
+    assert_eq!(actual, expect)
+}
+
+#[test]
+fn test_eval_infix_eq1() {
+    let actual = parse_and_eval("1 == 1");
+    let expect = new_object(ObjectKind::Boolean(true));
+    assert_eq!(actual, expect)
+}
+
+#[test]
+fn test_eval_infix_eq2() {
+    let actual = parse_and_eval("1 == 1 * 3");
+    let expect = new_object(ObjectKind::Boolean(false));
+    assert_eq!(actual, expect)
+}
+
+#[test]
+fn test_eval_infix_noteq1() {
+    let actual = parse_and_eval("1 != 1");
+    let expect = new_object(ObjectKind::Boolean(false));
+    assert_eq!(actual, expect)
+}
+
+#[test]
+fn test_eval_infix_noteq2() {
+    let actual = parse_and_eval("1 + 1 != 2");
+    let expect = new_object(ObjectKind::Boolean(true));
+    assert_eq!(actual, expect)
+}
+
+#[test]
+fn test_eval_infix_lt1() {
+    let actual = parse_and_eval("1 < 1");
+    let expect = new_object(ObjectKind::Boolean(false));
+    assert_eq!(actual, expect)
+}
+
+#[test]
+fn test_eval_infix_lt2() {
+    let actual = parse_and_eval("1 < 1 * 2");
+    let expect = new_object(ObjectKind::Boolean(true));
+    assert_eq!(actual, expect)
+}
+
+#[test]
+fn test_eval_infix_gt1() {
+    let actual = parse_and_eval("1 > 1");
+    let expect = new_object(ObjectKind::Boolean(true));
+    assert_eq!(actual, expect)
+}
+
+#[test]
+fn test_eval_infix_gt2() {
+    let actual = parse_and_eval("1 * 3 > 2");
+    let expect = new_object(ObjectKind::Boolean(true));
+    assert_eq!(actual, expect)
+}
+
+#[test]
+fn test_eval_prefix_sub1() {
+    let actual = parse_and_eval("-1");
+    let expect = new_object(ObjectKind::Boolean(false));
+    assert_eq!(actual, expect)
+}
+
+#[test]
+fn test_eval_prefix_sub2() {
+    let actual = parse_and_eval("-(1 + 1 * 4)");
+    let expect = new_object(ObjectKind::Integer(-5));
+    assert_eq!(actual, expect)
+}
+
+#[test]
+fn test_eval_prefix_not1() {
+    let actual = parse_and_eval("!true");
+    let expect = new_object(ObjectKind::Boolean(false));
+    assert_eq!(actual, expect)
+}
+
+#[test]
+fn test_eval_prefix_not2() {
+    let actual = parse_and_eval("!(1 > 2 * 3)");
+    let expect = new_object(ObjectKind::Boolean(true));
+    assert_eq!(actual, expect)
+}
+
+#[test]
+fn test_eval_ident1() {
+    let actual = parse_and_eval("i");
+    let expect = new_object(ObjectKind::Integer(1));
+    assert_eq!(actual, expect)
+}
+
+#[test]
+fn test_eval_ident2() {
+    let actual = parse_and_eval("b");
+    let expect = new_object(ObjectKind::Boolean(true));
     assert_eq!(actual, expect)
 }
