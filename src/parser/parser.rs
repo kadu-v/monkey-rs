@@ -1,10 +1,10 @@
-use std::{collections::HashMap, hash::Hash, vec};
+use std::{collections::HashMap, vec};
 
 use crate::{
     ast::{
         BlockStmt, Expr,
         ExprKind::{self, *},
-        Node, Op, Program, Stmt,
+        Op, Program, Stmt,
         StmtKind::{self, *},
     },
     error::{ParseError, Result},
@@ -86,7 +86,7 @@ impl<'input> Parser<'input> {
             self.next_token();
             Ok(cur_token_val)
         } else {
-            let loc = self.peek_token.loc;
+            let _loc = self.peek_token.loc;
             ParseError::not_match_token(self.cur_token.loc, self.cur_token.kind, kind)
         }
     }
@@ -350,7 +350,7 @@ impl<'input> Parser<'input> {
             TokenKind::GT => Ok(Op::Gt),
             TokenKind::BANG => Ok(Op::Not),
             _ => {
-                let loc = self.cur_token.loc;
+                let _loc = self.cur_token.loc;
                 ParseError::report_error_message(
                     self.cur_token.loc,
                     self.cur_token.kind,
@@ -414,7 +414,7 @@ impl<'input> Parser<'input> {
 
         self.expect_cur_token_and_consume(TokenKind::RPAREN)?;
 
-        let loc = loc + self.cur_token.loc;
+        let _loc = loc + self.cur_token.loc;
 
         Ok(args)
     }
@@ -460,7 +460,7 @@ impl<'input> Parser<'input> {
 
     // Assume that a kind of first token is STRING
     pub fn parse_lit_string(&mut self) -> Result<Expr> {
-        let loc = self.cur_token.loc;
+        let _loc = self.cur_token.loc;
         unimplemented!("parse_lit_string")
     }
 

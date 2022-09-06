@@ -2,8 +2,6 @@
 // Evaluator struct
 //-----------------------------------------------------------------------------
 
-use std::iter::Product;
-
 use crate::ast::{BlockStmt, Expr, ExprKind, Op, Program, Stmt, StmtKind};
 use crate::error::{EvalError, Result};
 use crate::object::{
@@ -39,6 +37,7 @@ impl Evaluable for Expr {
             ExprKind::LitInt(i) => Ok(Object::new(ObjectKind::Integer(*i), self.loc)),
             ExprKind::LitString(s) => unimplemented!("The case of LisString in eval"),
             ExprKind::LitBool(b) => Ok(Object::new(ObjectKind::Boolean(*b), self.loc)),
+            ExprKind::LitFunc(params, block) => unimplemented!("The case of LisFunc in eval"),
             ExprKind::Infix(op, ref left, ref right) => {
                 let left_obj = left.eval(env)?;
                 let right_obj = right.eval(env)?;
@@ -59,6 +58,7 @@ impl Evaluable for Expr {
                         Op::Not => unimplemented!(),
                         _ => Err(EvalError::new(left.loc, "invalid infix oprator").into()),
                     },
+                    #[allow(unreachable_patterns)]
                     _ => Err(EvalError::new(self.loc, "expected a integer type").into()),
                 }
             }
@@ -84,6 +84,7 @@ impl Evaluable for Expr {
             ExprKind::Call(func, params) => {
                 unimplemented!("function call case")
             }
+            #[allow(unreachable_patterns)]
             _ => unimplemented!("woops!!"),
         }
     }

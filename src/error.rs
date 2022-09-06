@@ -1,7 +1,7 @@
 //! Error structs of monkey
 use std::fmt::Debug;
 
-use crate::{ast::Node, loc::Loc, token::TokenKind};
+use crate::{loc::Loc, token::TokenKind};
 
 //-----------------------------------------------------------------------------
 // Trait for Error

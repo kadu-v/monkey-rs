@@ -18,6 +18,16 @@ fn new_object(kind: ObjectKind) -> Object {
     Object::new(kind, loc)
 }
 
+fn new_ident(x: impl Into<String>) -> Expr {
+    let kind = ExprKind::Ident(x.into());
+    Expr::new(kind, new_dummy_loc())
+}
+
+fn new_int(x: isize) -> Expr {
+    let kind = ExprKind::LitInt(x);
+    Expr::new(kind, new_dummy_loc())
+}
+
 fn parse_and_eval(input: &str) -> Object {
     let mut l = Lexer::new(input);
     let mut p = Parser::new(&mut l);
@@ -25,8 +35,32 @@ fn parse_and_eval(input: &str) -> Object {
         .parse_expression(1)
         .expect("can not parse a prefix expression");
     let mut env = Env::new();
+    let loc = new_dummy_loc();
     env.set("i", Object::new(ObjectKind::Integer(1), new_dummy_loc()));
     env.set("b", Object::new(ObjectKind::Boolean(true), new_dummy_loc()));
+    env.set(
+        "f",
+        Object::new(
+            ObjectKind::Function(
+                vec![new_ident("x")],
+                BlockStmt::new(
+                    vec![Stmt::new(
+                        StmtKind::ExprStmt(
+                            Expr::new(
+                                ExprKind::Infix(Op::Add, new_ident("x").into(), new_int(1).into()),
+                                loc,
+                            )
+                            .into(),
+                        ),
+                        loc,
+                    )],
+                    loc,
+                ),
+                Env::new(),
+            ),
+            loc,
+        ),
+    );
 
     prg.eval(&mut env).expect("cannot evaluate a false")
 }
@@ -209,5 +243,19 @@ fn test_eval_ident1() {
 fn test_eval_ident2() {
     let actual = parse_and_eval("b");
     let expect = new_object(ObjectKind::Boolean(true));
+    assert_eq!(actual, expect)
+}
+
+#[test]
+fn test_eval_call1() {
+    let actual = parse_and_eval("f(1)");
+    let expect = new_object(ObjectKind::Integer(2));
+    assert_eq!(actual, expect)
+}
+
+#[test]
+fn test_eval_call2() {
+    let actual = parse_and_eval("(fn(x) { x + i })(1)");
+    let expect = new_object(ObjectKind::Integer(2));
     assert_eq!(actual, expect)
 }
