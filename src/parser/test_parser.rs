@@ -496,7 +496,7 @@ fn test_parse_prefix_expression_not_true() {
 // Unit tests of Identifier Expression
 //-----------------------------------------------------------------------------
 #[test]
-fn test_parse_identifier_expression() {
+fn test_parse_identifier_expression1() {
     let input = "x";
     let mut l = Lexer::new(input);
     let mut p = Parser::new(&mut l);
@@ -505,6 +505,20 @@ fn test_parse_identifier_expression() {
         .expect("can not parse a identifier_expression");
 
     let expect = expr!("x");
+
+    assert_expr(expect, actual)
+}
+
+#[test]
+fn test_parse_identifier_expression2() {
+    let input = "b";
+    let mut l = Lexer::new(input);
+    let mut p = Parser::new(&mut l);
+    let actual = p
+        .parse_identifier_expression()
+        .expect("can not parse a identifier_expression");
+
+    let expect = expr!("b");
 
     assert_expr(expect, actual)
 }

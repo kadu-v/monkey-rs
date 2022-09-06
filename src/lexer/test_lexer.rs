@@ -43,3 +43,21 @@ fn test_lexer_delimitors() {
     assert_eq!(l.next_token().kind, TokenKind::LBRACKET);
     assert_eq!(l.next_token().kind, TokenKind::RBRACKET);
 }
+
+#[test]
+fn test_lexer_identifier() {
+    let input = "x b i";
+    let mut l = Lexer::new(input);
+
+    let tok = l.next_token();
+    assert_eq!(tok.kind, TokenKind::IDENT);
+    assert_eq!(tok.val, Some("x".into()));
+
+    let tok = l.next_token();
+    assert_eq!(tok.kind, TokenKind::IDENT);
+    assert_eq!(tok.val, Some("b".into()));
+
+    let tok = l.next_token();
+    assert_eq!(tok.kind, TokenKind::IDENT);
+    assert_eq!(tok.val, Some("i".into()))
+}

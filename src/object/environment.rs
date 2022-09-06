@@ -22,7 +22,7 @@ impl Env {
 
     pub fn get(&self, key: &String) -> Option<Object> {
         if self.store.contains_key(key) {
-            self.get(key)
+            self.store.get(key).map(|obj| obj.clone())
         } else {
             self.outer.as_ref().and_then(|env| env.get(key))
         }
