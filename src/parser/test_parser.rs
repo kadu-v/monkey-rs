@@ -434,6 +434,20 @@ fn test_parse_infix_expression_eq() {
 }
 
 #[test]
+fn test_parse_infix_expression_eq_integer() {
+    let input = "1 + 1 == 1";
+    let mut l = Lexer::new(input);
+    let mut p = Parser::new(&mut l);
+    let actual = p
+        .parse_expression(LOWEST)
+        .expect("can not parse a prefix_expression");
+
+    let expect = expr!(expr!(int!(1), +, int!(1)), ==, int!(1));
+
+    assert_expr(expect, actual)
+}
+
+#[test]
 fn test_parse_infix_expression_noteq() {
     let input = "true != false";
     let mut l = Lexer::new(input);

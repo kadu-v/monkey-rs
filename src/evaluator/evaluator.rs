@@ -43,21 +43,34 @@ impl Evaluable for Expr {
                 let right_obj = right.eval(env)?;
 
                 match (left_obj.kind, right_obj.kind) {
-                    (ObjectKind::Integer(i), ObjectKind::Integer(j)) => match op {
-                        Op::Add => Ok(Object::new(
-                            ObjectKind::Integer(i + j),
-                            left_obj.loc + right_obj.loc,
-                        )),
-                        Op::Sub => unimplemented!(),
-                        Op::Mul => unimplemented!(),
-                        Op::Div => unimplemented!(),
-                        Op::Eq => unimplemented!(),
-                        Op::NotEq => unimplemented!(),
-                        Op::Lt => unimplemented!(),
-                        Op::Gt => unimplemented!(),
-                        Op::Not => unimplemented!(),
-                        _ => Err(EvalError::new(left.loc, "invalid infix oprator").into()),
-                    },
+                    (ObjectKind::Integer(i), ObjectKind::Integer(j)) => {
+                        let kind = match op {
+                            Op::Add => ObjectKind::Integer(i + j),
+                            Op::Sub => ObjectKind::Integer(i - j),
+                            Op::Mul => ObjectKind::Integer(i * j),
+                            Op::Div => ObjectKind::Integer(i / j),
+                            Op::Eq => ObjectKind::Boolean(i == j),
+                            Op::NotEq => ObjectKind::Boolean(i != j),
+                            Op::Lt => ObjectKind::Boolean(i < j),
+                            Op::Gt => ObjectKind::Boolean(i > j),
+                            _ => {
+                                return Err(EvalError::new(left.loc, "invalid infix oprator").into())
+                            }
+                        };
+
+                        Ok(Object::new(kind, left_obj.loc + right_obj.loc))
+                    }
+                    (ObjectKind::Boolean(b), ObjectKind::Boolean(c)) => {
+                        let kind = match op {
+                            Op::Eq => ObjectKind::Boolean(b == c),
+                            Op::NotEq => ObjectKind::Boolean(b != c),
+                            _ => {
+                                return Err(EvalError::new(left.loc, "invalid infix oprator").into())
+                            }
+                        };
+
+                        Ok(Object::new(kind, left_obj.loc + right_obj.loc))
+                    }
                     #[allow(unreachable_patterns)]
                     _ => Err(EvalError::new(self.loc, "expected a integer type").into()),
                 }

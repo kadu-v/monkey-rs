@@ -32,7 +32,7 @@ fn parse_and_eval(input: &str) -> Object {
     let mut l = Lexer::new(input);
     let mut p = Parser::new(&mut l);
     let mut prg = p
-        .parse_expression(1)
+        .parse_expression(0)
         .expect("can not parse a prefix expression");
     let mut env = Env::new();
     let loc = new_dummy_loc();
@@ -109,14 +109,14 @@ fn test_eval_infix_add2() {
 #[test]
 fn test_eval_infix_sub1() {
     let actual = parse_and_eval("1 - 1");
-    let expect = new_object(ObjectKind::Integer(2));
+    let expect = new_object(ObjectKind::Integer(0));
     assert_eq!(actual, expect)
 }
 
 #[test]
 fn test_eval_infix_sub2() {
     let actual = parse_and_eval("1 + 1 - 2");
-    let expect = new_object(ObjectKind::Integer(4));
+    let expect = new_object(ObjectKind::Integer(0));
     assert_eq!(actual, expect)
 }
 
@@ -172,7 +172,7 @@ fn test_eval_infix_noteq1() {
 #[test]
 fn test_eval_infix_noteq2() {
     let actual = parse_and_eval("1 + 1 != 2");
-    let expect = new_object(ObjectKind::Boolean(true));
+    let expect = new_object(ObjectKind::Boolean(false));
     assert_eq!(actual, expect)
 }
 
@@ -193,7 +193,7 @@ fn test_eval_infix_lt2() {
 #[test]
 fn test_eval_infix_gt1() {
     let actual = parse_and_eval("1 > 1");
-    let expect = new_object(ObjectKind::Boolean(true));
+    let expect = new_object(ObjectKind::Boolean(false));
     assert_eq!(actual, expect)
 }
 
@@ -207,7 +207,7 @@ fn test_eval_infix_gt2() {
 #[test]
 fn test_eval_prefix_sub1() {
     let actual = parse_and_eval("-1");
-    let expect = new_object(ObjectKind::Boolean(false));
+    let expect = new_object(ObjectKind::Integer(-1));
     assert_eq!(actual, expect)
 }
 
