@@ -261,10 +261,7 @@ impl<'input> Parser<'input> {
             TokenKind::MINUS | TokenKind::BANG => self.parse_prefix_expression()?,
             TokenKind::LPAREN => self.parse_grouped_expression()?,
             // TokenKind::IF => self.parse_if_expression()?,
-            TokenKind::FUNCITON => unimplemented!(
-                "FUNCTION case of parse_expression has not implemented yet. A current token is {:?}",
-                self.cur_token.kind
-            ),
+            TokenKind::FUNCITON => self.parse_lit_function()?,
             TokenKind::LBRACKET => unimplemented!(
                 "LBRACKET case of parse_expression has not implemented yet. A current token is {:?}",
                 self.cur_token.kind

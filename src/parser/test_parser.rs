@@ -333,7 +333,7 @@ fn test_parse_lit_function_simple() {
     let mut l = Lexer::new(input);
     let mut p = Parser::new(&mut l);
     let actual = p
-        .parse_lit_function()
+        .parse_expression(LOWEST)
         .expect("can not parse a prefix expression");
 
     let expect = func!(
@@ -349,7 +349,7 @@ fn test_parse_lit_function_complex() {
     let mut l = Lexer::new(input);
     let mut p = Parser::new(&mut l);
     let actual = p
-        .parse_lit_function()
+        .parse_expression(LOWEST)
         .expect("can not parse a prefix expression");
 
     let expect = func!(
@@ -515,7 +515,7 @@ fn test_parse_identifier_expression1() {
     let mut l = Lexer::new(input);
     let mut p = Parser::new(&mut l);
     let actual = p
-        .parse_identifier_expression()
+        .parse_expression(LOWEST)
         .expect("can not parse a identifier_expression");
 
     let expect = expr!("x");
@@ -529,7 +529,7 @@ fn test_parse_identifier_expression2() {
     let mut l = Lexer::new(input);
     let mut p = Parser::new(&mut l);
     let actual = p
-        .parse_identifier_expression()
+        .parse_expression(LOWEST)
         .expect("can not parse a identifier_expression");
 
     let expect = expr!("b");
@@ -627,9 +627,7 @@ fn test_parse_let_statement() {
     let input = "let x = 1;";
     let mut l = Lexer::new(input);
     let mut p = Parser::new(&mut l);
-    let actual = p
-        .parse_let_statement()
-        .expect("can not parse let statement");
+    let actual = p.parse_statement().expect("can not parse let statement");
 
     let expect = stmt!(let, "x", =,  int!(1), ;);
     assert_stmt(expect, actual)
@@ -640,9 +638,7 @@ fn test_parse_return_statement() {
     let input = "return 1 + 1;";
     let mut l = Lexer::new(input);
     let mut p = Parser::new(&mut l);
-    let actual = p
-        .parse_return_statement()
-        .expect("can not parse return statement");
+    let actual = p.parse_statement().expect("can not parse return statement");
 
     let expect = stmt!(return, expr!(int!(1), +, int!(1)), ;);
     assert_stmt(expect, actual)
@@ -653,9 +649,7 @@ fn test_parse_expression_statement() {
     let input = "1 + 2;";
     let mut l = Lexer::new(input);
     let mut p = Parser::new(&mut l);
-    let actual = p
-        .parse_expression_statement()
-        .expect("can not parse e statement");
+    let actual = p.parse_statement().expect("can not parse e statement");
 
     let expect = stmt!(expr!(int!(1), + , int!(2)), ;);
     assert_stmt(expect, actual)
@@ -667,7 +661,7 @@ fn test_parse_if_statement() {
     let mut l = Lexer::new(input);
     let mut p = Parser::new(&mut l);
     let actual = p
-        .parse_if_statement()
+        .parse_statement()
         .expect("can not parse a prefix_expression");
 
     let expect = stmt!(
