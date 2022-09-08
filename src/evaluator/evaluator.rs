@@ -2,8 +2,12 @@
 // Evaluator struct
 //-----------------------------------------------------------------------------
 
+use std::f32::consts::E;
+
 use crate::ast::{BlockStmt, Expr, ExprKind, Op, Program, Stmt, StmtKind};
 use crate::error::{EvalError, Result};
+use crate::loc::Loc;
+use crate::object;
 use crate::object::{
     environment::Env,
     object::{Object, ObjectKind},
@@ -17,7 +21,46 @@ impl Eval {
         Self {}
     }
 
-    // pub fn eval(&self, node: ) -> Result<Object> {}
+    pub fn eval_expressions(exprs: &Vec<Expr>, env: &mut Env) -> Result<Vec<Object>> {
+        let mut objs = vec![];
+
+        for expr in exprs.iter() {
+            let evaluated = expr.eval(env)?;
+            objs.push(evaluated);
+        }
+        Ok(objs)
+    }
+
+    pub fn apply_function(f: Object, args: Vec<Object>) -> Result<Object> {
+        match f.kind {
+            ObjectKind::Function(params, body, env) => {
+                let mut extended_env = Self::extended_function_env(&params, env, &args, f.loc)?;
+                body.eval(&mut extended_env)
+            }
+            _ => Err(EvalError::new(f.loc, "application should be a function object").into()),
+        }
+    }
+
+    pub fn extended_function_env(
+        params: &Vec<Expr>,
+        env: Env,
+        args: &Vec<Object>,
+        loc: Loc,
+    ) -> Result<Env> {
+        let mut env = Env::new_enclosed_env(Box::new(env));
+
+        for (i, param) in params.iter().enumerate() {
+            match &param.kind {
+                ExprKind::Ident(p) => {
+                    env.set(p, args[i].clone());
+                }
+                _ => {
+                    return Err(EvalError::new(loc, "parameters should be identifier").into());
+                }
+            }
+        }
+        Ok(env)
+    }
 }
 
 //-----------------------------------------------------------------------------
@@ -37,7 +80,10 @@ impl Evaluable for Expr {
             ExprKind::LitInt(i) => Ok(Object::new(ObjectKind::Integer(*i), self.loc)),
             ExprKind::LitString(s) => unimplemented!("The case of LisString in eval"),
             ExprKind::LitBool(b) => Ok(Object::new(ObjectKind::Boolean(*b), self.loc)),
-            ExprKind::LitFunc(params, block) => unimplemented!("The case of LisFunc in eval"),
+            ExprKind::LitFunc(params, body) => Ok(Object::new(
+                ObjectKind::Function(params.clone(), body.clone(), env.clone()),
+                self.loc,
+            )),
             ExprKind::Infix(op, ref left, ref right) => {
                 let left_obj = left.eval(env)?;
                 let right_obj = right.eval(env)?;
@@ -95,7 +141,9 @@ impl Evaluable for Expr {
                 }
             }
             ExprKind::Call(func, params) => {
-                unimplemented!("function call case")
+                let f = func.eval(env)?;
+                let args = Eval::eval_expressions(params, env)?;
+                Eval::apply_function(f, args)
             }
             #[allow(unreachable_patterns)]
             _ => unimplemented!("woops!!"),
