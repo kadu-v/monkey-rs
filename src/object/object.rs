@@ -24,7 +24,7 @@ impl Eq for Object {}
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum ObjectKind {
-    Null,
+    Unit,
     Integer(isize),
     Boolean(bool),
     String(String),

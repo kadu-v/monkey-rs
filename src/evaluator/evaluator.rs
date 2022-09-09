@@ -35,7 +35,8 @@ impl Eval {
         match f.kind {
             ObjectKind::Function(params, body, env) => {
                 let mut extended_env = Self::extended_function_env(&params, env, &args, f.loc)?;
-                body.eval(&mut extended_env)
+                let evaluated = body.eval(&mut extended_env)?;
+                Self::unwrap_return_value(evaluated)
             }
             _ => Err(EvalError::new(f.loc, "application should be a function object").into()),
         }
@@ -61,6 +62,13 @@ impl Eval {
         }
         Ok(env)
     }
+
+    pub fn unwrap_return_value(obj: Object) -> Result<Object> {
+        match obj.kind {
+            ObjectKind::Return(obj) => Ok(*obj),
+            _ => Err(EvalError::new(obj.loc, "should be a return value object").into()),
+        }
+    }
 }
 
 //-----------------------------------------------------------------------------
@@ -78,7 +86,7 @@ impl Evaluable for Expr {
     fn eval(&self, env: &mut Env) -> Result<Object> {
         match &self.kind {
             ExprKind::LitInt(i) => Ok(Object::new(ObjectKind::Integer(*i), self.loc)),
-            ExprKind::LitString(s) => unimplemented!("The case of LisString in eval"),
+            ExprKind::LitString(s) => Ok(Object::new(ObjectKind::String(s.clone()), self.loc)),
             ExprKind::LitBool(b) => Ok(Object::new(ObjectKind::Boolean(*b), self.loc)),
             ExprKind::LitFunc(params, body) => Ok(Object::new(
                 ObjectKind::Function(params.clone(), body.clone(), env.clone()),
@@ -158,8 +166,22 @@ impl Evaluable for Expr {
 impl Evaluable for Stmt {
     fn eval(&self, env: &mut Env) -> Result<Object> {
         match &self.kind {
-            StmtKind::Let(ident, expr) => unimplemented!(),
-            StmtKind::Return(expr) => unimplemented!(),
+            StmtKind::Let(ident, expr) => {
+                if let ExprKind::Ident(ident) = &ident.kind {
+                    let obj = expr.eval(env)?;
+                    env.set(ident, obj);
+                    Ok(Object::new(ObjectKind::Unit, self.loc))
+                } else {
+                    Err(
+                        EvalError::new(ident.loc, "should be an identifier at let statement")
+                            .into(),
+                    )
+                }
+            }
+            StmtKind::Return(expr) => {
+                let obj = expr.eval(env)?;
+                Ok(Object::new(ObjectKind::Return(obj.into()), self.loc))
+            }
             StmtKind::ExprStmt(expr) => unimplemented!(),
             StmtKind::If(cond, expr0, expr1) => unimplemented!(),
         }
@@ -172,7 +194,22 @@ impl Evaluable for Stmt {
 
 impl Evaluable for BlockStmt {
     fn eval(&self, env: &mut Env) -> Result<Object> {
-        unimplemented!()
+        let block = &self.block;
+        if block.len() == 0 {
+            return Err(EvalError::new(self.loc, "block statement shuould be a non empty").into());
+        }
+
+        let mut obj = block[0].eval(env)?;
+
+        for (i, stmt) in block.iter().enumerate() {
+            if i == 0 {
+                continue;
+            }
+
+            obj = stmt.eval(env)?;
+        }
+
+        Ok(obj)
     }
 }
 
