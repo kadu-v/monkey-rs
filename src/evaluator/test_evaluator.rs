@@ -295,8 +295,13 @@ fn test_eval_return_statement() {
 #[test]
 fn test_eval_expression_statement() {
     let actual = parse_statement_and_eval("1 + 1;");
-    let expect = new_object(ObjectKind::Return(
-        new_object(ObjectKind::Integer(1)).into(),
-    ));
+    let expect = new_object(ObjectKind::Unit);
+    assert_eq!(expect, actual)
+}
+
+#[test]
+fn test_eval_if_statement() {
+    let actual = parse_statement_and_eval("if (true) { 1 + 1; } else { let x = 2; }");
+    let expect = new_object(ObjectKind::Integer(2));
     assert_eq!(expect, actual)
 }

@@ -182,7 +182,10 @@ impl Evaluable for Stmt {
                 let obj = expr.eval(env)?;
                 Ok(Object::new(ObjectKind::Return(obj.into()), self.loc))
             }
-            StmtKind::ExprStmt(expr) => unimplemented!(),
+            StmtKind::ExprStmt(expr) => {
+                expr.eval(env)?;
+                Ok(Object::new(ObjectKind::Unit, self.loc).into())
+            }
             StmtKind::If(cond, expr0, expr1) => unimplemented!(),
         }
     }
