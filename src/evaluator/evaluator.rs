@@ -186,7 +186,24 @@ impl Evaluable for Stmt {
                 expr.eval(env)?;
                 Ok(Object::new(ObjectKind::Unit, self.loc).into())
             }
-            StmtKind::If(cond, expr0, expr1) => unimplemented!(),
+            StmtKind::If(cond, expr0, expr1) => {
+                let cond_obj = cond.eval(env)?;
+                match cond_obj.kind {
+                    ObjectKind::Boolean(true) => {
+                        let obj = expr0.eval(env)?;
+                        Ok(Object::new(ObjectKind::Unit, obj.loc))
+                    }
+                    ObjectKind::Boolean(false) => {
+                        let mut loc = self.loc;
+                        if let Some(expr1) = expr1 {
+                            let obj = expr1.eval(env)?;
+                            loc = obj.loc
+                        }
+                        Ok(Object::new(ObjectKind::Unit, loc))
+                    }
+                    _ => Err(EvalError::new(self.loc, "condition should be boolean").into()),
+                }
+            }
         }
     }
 }
