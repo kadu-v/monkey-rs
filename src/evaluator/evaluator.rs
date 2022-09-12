@@ -179,10 +179,7 @@ impl Evaluable for Stmt {
                 let obj = expr.eval(env)?;
                 Ok(Object::new(ObjectKind::Return(obj.into()), self.loc))
             }
-            StmtKind::ExprStmt(expr) => {
-                expr.eval(env)?;
-                Ok(Object::new(ObjectKind::Unit, self.loc).into())
-            }
+            StmtKind::ExprStmt(expr) => expr.eval(env),
             StmtKind::If(cond, expr0, expr1) => {
                 let cond_obj = cond.eval(env)?;
                 match cond_obj.kind {

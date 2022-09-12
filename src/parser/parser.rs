@@ -8,6 +8,7 @@ use crate::{
         StmtKind::{self, *},
     },
     error::{ParseError, Result},
+    evaluator::evaluator::Evaluable,
     lexer::lexer::Lexer,
     loc::Loc,
     token::{Token, TokenKind},
@@ -124,7 +125,7 @@ impl<'input> Parser<'input> {
     pub fn parse_program(&mut self) -> Result<Program> {
         let mut stmts = Vec::new();
         let mut loc = Loc::new(0, 0, 0, 0);
-        while self.cur_token_kind_is(TokenKind::EOF) {
+        while !self.cur_token_kind_is(TokenKind::EOF) {
             let stmt = self.parse_statement()?;
             loc = loc + stmt.loc;
             stmts.push(stmt);

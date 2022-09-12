@@ -646,7 +646,7 @@ fn test_parse_return_statement() {
 
 #[test]
 fn test_parse_expression_statement() {
-    let input = "1 + 2;";
+    let input = "1 + 2;\n";
     let mut l = Lexer::new(input);
     let mut p = Parser::new(&mut l);
     let actual = p.parse_statement().expect("can not parse e statement");

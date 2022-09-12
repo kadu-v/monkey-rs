@@ -1,25 +1,41 @@
 use crate::evaluator::evaluator::Evaluable;
 use crate::lexer::lexer::Lexer;
 use crate::object::environment::Env;
-use crate::object::object::Object;
-use crate::parser;
 use crate::parser::parser::Parser;
 use crate::{error::Error, object};
-use std::io::BufRead;
+use std::io;
+use std::io::Write;
+
+const PROMPT: &str = "monkey>";
 
 #[derive(Debug, PartialEq, Eq, Clone)]
 pub struct Repl {}
 
 impl Repl {
-    pub fn start(reader: &mut impl BufRead, //, writer: &mut impl BufWrite
-    ) {
+    pub fn start() {
         let mut env = Env::new();
 
         loop {
+            print!("{} ", PROMPT);
+            io::stdout().flush().unwrap();
+
+            // println!("Guess the number!"); // 数を当ててごらん
+
+            // println!("Please input your guess."); // ほら、予想を入力してね
             let mut buffer = String::new();
-            let size = reader
+            io::stdin()
                 .read_line(&mut buffer)
                 .expect("Woops!!, stdin is panic.");
+
+            // println!("Guess the number!"); // 数を当ててごらん
+
+            // println!("Please input your guess."); // ほら、予想を入力してね
+
+            // let mut guess = String::new();
+
+            // std::io::stdin()
+            //     .read_line(&mut guess)
+            //     .expect("Failed to read line"); // 行の読み込みに失敗しました
 
             if buffer == ":q".to_string() {
                 break;

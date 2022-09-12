@@ -1,5 +1,5 @@
 //! Error structs of monkey
-use std::fmt::Debug;
+use std::{fmt::Debug, iter::Product};
 
 use crate::{loc::Loc, token::TokenKind};
 
@@ -63,8 +63,19 @@ impl ParseError {
 
 impl Error for ParseError {
     fn do_error_report(&self, code: &str) {
-        println!("Parse Error: ");
-        println!("{:?}", code);
+        let loc = self.loc;
+
+        println!("Parse Error: {}", self.error_msg);
+        if code.ends_with('\n') {
+            println!("{}", &code[0..code.len() - 1]);
+        } else {
+            println!("{}", &code);
+        }
+        println!(
+            "{}{}",
+            " ".repeat(loc.left),
+            "^".repeat(loc.right - loc.left)
+        );
     }
 }
 
@@ -99,8 +110,19 @@ impl EvalError {
 
 impl Error for EvalError {
     fn do_error_report(&self, code: &str) {
-        println!("Eval Error: ");
-        println!("{:?}", code);
+        let loc = self.loc;
+
+        println!("Parse Error: {}", self.error_msg);
+        if code.ends_with('\n') {
+            println!("{}", &code[0..code.len() - 1]);
+        } else {
+            println!("{}", &code);
+        }
+        println!(
+            "{}{}",
+            " ".repeat(loc.left),
+            "^".repeat(loc.right - loc.left)
+        );
     }
 }
 
