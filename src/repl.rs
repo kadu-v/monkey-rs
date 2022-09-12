@@ -2,7 +2,6 @@ use crate::evaluator::evaluator::Evaluable;
 use crate::lexer::lexer::Lexer;
 use crate::object::environment::Env;
 use crate::parser::parser::Parser;
-use crate::{error::Error, object};
 use std::io;
 use std::io::Write;
 

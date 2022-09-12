@@ -8,7 +8,6 @@ use crate::{
         StmtKind::{self, *},
     },
     error::{ParseError, Result},
-    evaluator::evaluator::Evaluable,
     lexer::lexer::Lexer,
     loc::Loc,
     token::{Token, TokenKind},

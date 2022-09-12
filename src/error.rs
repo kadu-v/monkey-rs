@@ -1,5 +1,5 @@
 //! Error structs of monkey
-use std::{fmt::Debug, iter::Product};
+use std::fmt::Debug;
 
 use crate::{loc::Loc, token::TokenKind};
 
