@@ -112,7 +112,7 @@ impl Error for EvalError {
     fn do_error_report(&self, code: &str) {
         let loc = self.loc;
 
-        println!("Parse Error: {}", self.error_msg);
+        println!("Eval Error: {}", self.error_msg);
         if code.ends_with('\n') {
             println!("{}", &code[0..code.len() - 1]);
         } else {
