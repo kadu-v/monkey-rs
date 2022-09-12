@@ -1,6 +1,6 @@
-use monkey_rs::lexer;
-
+use monkey_rs::repl::Repl;
 
 fn main() {
-    println!("Hello, world!");
+    let mut reader = std::io::stdin().lock();
+    Repl::start(&mut reader);
 }

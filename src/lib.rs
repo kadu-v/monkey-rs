@@ -5,4 +5,5 @@ pub mod lexer;
 pub mod loc;
 pub mod object;
 pub mod parser;
+pub mod repl;
 pub mod token;

@@ -6,7 +6,9 @@ use crate::{loc::Loc, token::TokenKind};
 //-----------------------------------------------------------------------------
 // Trait for Error
 //-----------------------------------------------------------------------------\
-pub trait Error: Debug {}
+pub trait Error: Debug {
+    fn do_error_report(&self, code: &str);
+}
 
 pub type Result<T> = std::result::Result<T, Box<dyn Error>>;
 
@@ -59,7 +61,12 @@ impl ParseError {
     }
 }
 
-impl Error for ParseError {}
+impl Error for ParseError {
+    fn do_error_report(&self, code: &str) {
+        println!("Parse Error: ");
+        println!("{:?}", code);
+    }
+}
 
 impl From<ParseError> for Box<dyn Error> {
     fn from(item: ParseError) -> Self {
@@ -90,7 +97,12 @@ impl EvalError {
     }
 }
 
-impl Error for EvalError {}
+impl Error for EvalError {
+    fn do_error_report(&self, code: &str) {
+        println!("Eval Error: ");
+        println!("{:?}", code);
+    }
+}
 
 impl From<EvalError> for Box<dyn Error> {
     fn from(item: EvalError) -> Self {
