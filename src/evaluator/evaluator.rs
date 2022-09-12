@@ -2,12 +2,9 @@
 // Evaluator struct
 //-----------------------------------------------------------------------------
 
-use std::f32::consts::E;
-
 use crate::ast::{BlockStmt, Expr, ExprKind, Op, Program, Stmt, StmtKind};
 use crate::error::{EvalError, Result};
 use crate::loc::Loc;
-use crate::object;
 use crate::object::{
     environment::Env,
     object::{Object, ObjectKind},
@@ -239,6 +236,10 @@ impl Evaluable for BlockStmt {
 
 impl Evaluable for Program {
     fn eval(&self, env: &mut Env) -> Result<Object> {
-        unimplemented!()
+        let mut obj = Object::new(ObjectKind::Unit, self.loc);
+        for stmt in self.stmts.iter() {
+            obj = stmt.eval(env)?;
+        }
+        Ok(obj)
     }
 }
