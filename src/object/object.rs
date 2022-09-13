@@ -1,4 +1,4 @@
-use std::fmt::{write, Display};
+use std::fmt::Display;
 
 use crate::ast::{BlockStmt, Expr};
 use crate::loc::Loc;
@@ -45,7 +45,7 @@ impl Display for Object {
             ObjectKind::Boolean(b) => write!(f, "{}", b),
             ObjectKind::String(s) => write!(f, "{}", s),
             ObjectKind::Return(obj) => write!(f, "return {};", obj),
-            ObjectKind::Function(params, body, env) => write!(f, "function"),
+            ObjectKind::Function(_params, _body, _env) => write!(f, "function"),
         }
     }
 }

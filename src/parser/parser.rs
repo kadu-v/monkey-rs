@@ -1,4 +1,4 @@
-use std::{collections::HashMap, f32::consts::E, vec};
+use std::{collections::HashMap, vec};
 
 use crate::{
     ast::{
