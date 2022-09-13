@@ -8,7 +8,7 @@ $ cd monkey-rs
 $ cargo r
 ```
 
-Then, starting the following porompt.
+Then, starting the following prompt.
 ```
 $ monkey> 
 ```
