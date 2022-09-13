@@ -63,7 +63,7 @@ impl Eval {
     pub fn unwrap_return_value(obj: Object) -> Result<Object> {
         match obj.kind {
             ObjectKind::Return(obj) => Ok(*obj),
-            _ => Err(EvalError::new(obj.loc, "should be a return value object").into()),
+            _ => Ok(obj),
         }
     }
 }
@@ -123,7 +123,14 @@ impl Evaluable for Expr {
                         Ok(Object::new(kind, left_obj.loc + right_obj.loc))
                     }
                     #[allow(unreachable_patterns)]
-                    _ => Err(EvalError::new(self.loc, "expected a integer type").into()),
+                    (left_obj, right_obj) => Err(EvalError::new(
+                        self.loc,
+                        format!(
+                            "expected a integer type:\n left: {:?}\n right: {:?}",
+                            left_obj, right_obj
+                        ),
+                    )
+                    .into()),
                 }
             }
             ExprKind::Prefix(op, ref expr) => {
@@ -140,9 +147,22 @@ impl Evaluable for Expr {
             }
             ExprKind::Ident(ident) => {
                 if let Some(obj) = env.get(ident) {
-                    Ok(Object::new(obj.kind, obj.loc).into())
+                    match &obj.kind {
+                        ObjectKind::Function(args, body, fenv) => {
+                            let mut fenv = fenv.clone();
+                            fenv.set(ident, obj.clone());
+                            Ok(Object::new(
+                                ObjectKind::Function(args.clone(), body.clone(), fenv),
+                                self.loc,
+                            ))
+                        }
+                        _ => Ok(Object::new(obj.kind, self.loc)),
+                    }
                 } else {
-                    Err(EvalError::new(self.loc, "use a undefined identifier").into())
+                    Err(
+                        EvalError::new(self.loc, format!("use a undefined identifier: {}", ident))
+                            .into(),
+                    )
                 }
             }
             ExprKind::Call(func, params) => {
@@ -180,18 +200,14 @@ impl Evaluable for Stmt {
                 Ok(Object::new(ObjectKind::Return(obj.into()), self.loc))
             }
             StmtKind::ExprStmt(expr) => expr.eval(env),
-            StmtKind::If(cond, expr0, expr1) => {
+            StmtKind::If(cond, block0, block1) => {
                 let cond_obj = cond.eval(env)?;
                 match cond_obj.kind {
-                    ObjectKind::Boolean(true) => {
-                        let obj = expr0.eval(env)?;
-                        Ok(Object::new(ObjectKind::Unit, obj.loc))
-                    }
+                    ObjectKind::Boolean(true) => block0.eval(env),
                     ObjectKind::Boolean(false) => {
-                        let mut loc = self.loc;
-                        if let Some(expr1) = expr1 {
-                            let obj = expr1.eval(env)?;
-                            loc = obj.loc
+                        let loc = self.loc;
+                        if let Some(block1) = block1 {
+                            return block1.eval(env);
                         }
                         Ok(Object::new(ObjectKind::Unit, loc))
                     }

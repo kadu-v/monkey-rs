@@ -76,6 +76,18 @@ fn parse_statement_and_eval(input: &str) -> Object {
 
     prg.eval(&mut env).expect("cannot evaluate a false")
 }
+
+fn parse_program_and_eval(input: &str) -> Object {
+    let mut l = Lexer::new(input);
+    let mut p = Parser::new(&mut l);
+    let prg = p
+        .parse_program()
+        .expect("can not parse a prefix expression");
+    let mut env = Env::new();
+    let loc = new_dummy_loc();
+
+    prg.eval(&mut env).expect("cannot evaluate a false")
+}
 //-----------------------------------------------------------------------------
 // Unit tests of Expressions
 //-----------------------------------------------------------------------------
@@ -272,6 +284,13 @@ fn test_eval_call2() {
     assert_eq!(expect, actual)
 }
 
+#[test]
+fn test_eval_call3() {
+    let actual = parse_expression_and_eval("(fn(x) { x + i * 2 })(1)");
+    let expect = new_object(ObjectKind::Integer(3));
+    assert_eq!(expect, actual)
+}
+
 //-----------------------------------------------------------------------------
 // Unit tests of Statement
 //-----------------------------------------------------------------------------
@@ -295,7 +314,7 @@ fn test_eval_return_statement() {
 #[test]
 fn test_eval_expression_statement() {
     let actual = parse_statement_and_eval("1 + 1;");
-    let expect = new_object(ObjectKind::Unit);
+    let expect = new_object(ObjectKind::Integer(2));
     assert_eq!(expect, actual)
 }
 
@@ -303,5 +322,62 @@ fn test_eval_expression_statement() {
 fn test_eval_if_statement() {
     let actual = parse_statement_and_eval("if (true) { 1 + 1; } else { let x = 2; }");
     let expect = new_object(ObjectKind::Unit);
+    assert_eq!(expect, actual)
+}
+
+//-----------------------------------------------------------------------------
+// Unit tests of Program
+//-----------------------------------------------------------------------------
+
+#[test]
+fn test_eval_program_function() {
+    let actual = parse_program_and_eval("let f = fn(x) { 2 * x + 1 }; f(100)");
+    let expect = new_object(ObjectKind::Integer(201));
+    assert_eq!(expect, actual)
+}
+
+#[test]
+fn test_eval_program_fibonacci() {
+    let actual = parse_program_and_eval(
+        "let fib = fn(x) {
+        if (x == 0) {
+          0
+        } else {
+          if (x == 1) {
+            return 1;
+          } else {
+            fib(x - 1) + fib(x - 2)
+          }
+        }
+      }; fib(10)",
+    );
+    let expect = new_object(ObjectKind::Integer(55));
+    assert_eq!(expect, actual)
+}
+
+#[test]
+fn test_eval_program_higer_order_function() {
+    let actual = parse_program_and_eval(
+        "let newAdder = fn(a, b) {
+            fn(c) { a + b + c };
+        };
+        let adder = newAdder(1, 2);
+        
+        adder(8)",
+    );
+    let expect = new_object(ObjectKind::Integer(11));
+    assert_eq!(expect, actual)
+}
+
+#[test]
+fn test_eval_program() {
+    let actual = parse_program_and_eval(
+        "let x = 1;
+        let y = 1;
+        let f = fn(z) { x + y + z };
+        let x = 2;
+        f(10)",
+    );
+    let expect = new_object(ObjectKind::Integer(12));
     assert_eq!(expect, actual)
 }

@@ -86,6 +86,7 @@ fn assert_expr(expect: Expr, actual: Expr) {
 }
 
 fn assert_block_stmt(expect: BlockStmt, actual: BlockStmt) {
+    assert_eq!(expect.block.len(), actual.block.len(), "a number of statements in block statement should be equal.");
     for (stmt0, stmt1) in expect.block.into_iter().zip(actual.block) {
         assert_stmt(stmt0, stmt1);
     }
@@ -618,12 +619,26 @@ fn test_parse_precedence_of_expression4() {
     assert_expr(expect, actual)
 }
 
+#[test]
+fn test_parse_precedence_of_expression5() {
+    let input = "f(1) + f(1)";
+    let mut l = Lexer::new(input);
+    let mut p = Parser::new(&mut l);
+    let actual = p
+        .parse_expression(LOWEST)
+        .expect("can not parse a prefix_expression");
+    let expect = expr!(expr!("f", int!(1)), + , expr!("f", int!(1)));
+
+    assert_expr(expect, actual)
+}
+
+
 //-----------------------------------------------------------------------------
 // Unit tests of Statements
 //-----------------------------------------------------------------------------
 
 #[test]
-fn test_parse_let_statement() {
+fn test_parse_let_statement1() {
     let input = "let x = 1;";
     let mut l = Lexer::new(input);
     let mut p = Parser::new(&mut l);
@@ -632,6 +647,9 @@ fn test_parse_let_statement() {
     let expect = stmt!(let, "x", =,  int!(1), ;);
     assert_stmt(expect, actual)
 }
+
+
+
 
 #[test]
 fn test_parse_return_statement() {
@@ -657,7 +675,7 @@ fn test_parse_expression_statement() {
 
 #[test]
 fn test_parse_if_statement() {
-    let input = "if true { 1; } else { 2; } ";
+    let input = "if true { 1 } else { 2; } ";
     let mut l = Lexer::new(input);
     let mut p = Parser::new(&mut l);
     let actual = p
@@ -679,8 +697,8 @@ fn test_parse_if_statement() {
 //-----------------------------------------------------------------------------
 
 #[test]
-fn test_parse_block_statement() {
-    let input = "{ 1+2; let x = 1; return x; }";
+fn test_parse_block_statement1() {
+    let input = "{ 1+2; let x = 1; return x;  1 }";
     let mut l = Lexer::new(input);
     let mut p = Parser::new(&mut l);
     let actual = p
@@ -690,7 +708,25 @@ fn test_parse_block_statement() {
     let expect = blockstmt!(
                     stmt!(expr!(int!(1), +, int!(2)), ;);
                     stmt!(let, "x", =,  int!(1), ;);
-                    stmt!(return, expr!("x"), ;)
+                    stmt!(return, expr!("x"), ;);
+                    stmt!(int!(1), ;)
+    );
+    assert_block_stmt(expect, actual)
+}
+
+#[test]
+fn test_parse_block_statement2() {
+    let input = "{ 1 1 x }";
+    let mut l = Lexer::new(input);
+    let mut p = Parser::new(&mut l);
+    let actual = p
+        .parse_block_statement()
+        .expect("can not parse e statement");
+
+    let expect = blockstmt!(
+                    stmt!(int!(1), ;);
+                    stmt!(int!(1), ;);
+                    stmt!(expr!("x"), ;)
     );
     assert_block_stmt(expect, actual)
 }

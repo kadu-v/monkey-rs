@@ -1,3 +1,5 @@
+use std::fmt::{write, Display};
+
 use crate::ast::{BlockStmt, Expr};
 use crate::loc::Loc;
 use crate::object::environment::Env;
@@ -33,4 +35,17 @@ pub enum ObjectKind {
     // Array(Vec<Object>),
     // Hash(...),
     // Builtin,
+}
+
+impl Display for Object {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match &self.kind {
+            ObjectKind::Unit => write!(f, "()"),
+            ObjectKind::Integer(i) => write!(f, "{}", i),
+            ObjectKind::Boolean(b) => write!(f, "{}", b),
+            ObjectKind::String(s) => write!(f, "{}", s),
+            ObjectKind::Return(obj) => write!(f, "return {};", obj),
+            ObjectKind::Function(params, body, env) => write!(f, "function"),
+        }
+    }
 }

@@ -1,4 +1,4 @@
-use std::{collections::HashMap, vec};
+use std::{collections::HashMap, f32::consts::E, vec};
 
 use crate::{
     ast::{
@@ -128,7 +128,6 @@ impl<'input> Parser<'input> {
             let stmt = self.parse_statement()?;
             loc = loc + stmt.loc;
             stmts.push(stmt);
-            self.next_token();
         }
 
         Ok(Program::new(stmts, loc))
@@ -188,8 +187,9 @@ impl<'input> Parser<'input> {
 
         let expr = self.parse_expression(LOWEST)?;
 
-        self.expect_cur_token_and_consume(TokenKind::SEMICOLON)?;
-
+        if self.cur_token_kind_is(TokenKind::SEMICOLON) {
+            self.next_token();
+        }
         // calculate a location of expression-statement
         let loc = loc0 + self.cur_token.loc;
 

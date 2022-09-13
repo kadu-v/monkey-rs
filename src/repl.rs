@@ -18,25 +18,12 @@ impl Repl {
             print!("{} ", PROMPT);
             io::stdout().flush().unwrap();
 
-            // println!("Guess the number!"); // 数を当ててごらん
-
-            // println!("Please input your guess."); // ほら、予想を入力してね
             let mut buffer = String::new();
             io::stdin()
                 .read_line(&mut buffer)
                 .expect("Woops!!, stdin is panic.");
 
-            // println!("Guess the number!"); // 数を当ててごらん
-
-            // println!("Please input your guess."); // ほら、予想を入力してね
-
-            // let mut guess = String::new();
-
-            // std::io::stdin()
-            //     .read_line(&mut guess)
-            //     .expect("Failed to read line"); // 行の読み込みに失敗しました
-
-            if buffer == ":q".to_string() {
+            if buffer == ":q\n".to_string() {
                 break;
             }
 
@@ -45,7 +32,7 @@ impl Repl {
             match psr.parse_program() {
                 Ok(prg) => match prg.eval(&mut env) {
                     Ok(obj) => {
-                        println!("{:?}", obj)
+                        println!("{}", obj)
                     }
                     Err(err) => err.do_error_report(&buffer),
                 },
