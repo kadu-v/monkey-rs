@@ -40,22 +40,17 @@ x + false;
 ```
 $ monkey> let x = 1;
 ()
-
 $ monkey> x + x;
 2
-
 $ monkey> let fib = fn(x) { if (x == 0) { 0 } else { if (x == 1) { return 1; } else { fib(x - 1) + fib(x - 2) }}}; 
 ()
 $monkey> fib(10)
 55
-
 $monkey> let newAdder = fn(a, b) { fn(c) { a + b + c };};
 ()
-
 $monkey> let adder = newAdder(1, 2);
-
+()
 $monkey> adder(8);
 11
-
 $ monkey> :q
 ```
